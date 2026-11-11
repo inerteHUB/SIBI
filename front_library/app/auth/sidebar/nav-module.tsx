@@ -1,22 +1,35 @@
 "use client"
 
+import { usePathname } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 import { SidebarModule } from "../typeSystemData"
 import { apiBackend } from "@/config/constants"
-import Link from "next/link"
 
-function ModuleIcon({ icon, name, size = 15, is_parent }: { icon: string; name: string; size?: number, is_parent: boolean }) {
+function isModuleActive(pathname: string, modulePath: string | null) {
+    if (!modulePath) return false
+    const currentPath = pathname.replace(/\/+$/, "")
+    const targetPath = `/modules${modulePath}`.replace(/\/+$/, "")
+    return currentPath === targetPath || currentPath.startsWith(`${targetPath}/`)
+}
+
+function ModuleIcon({ icon, size = 15, is_parent }: { icon: string; size?: number; is_parent: boolean }) {
     return (
-        <img
+        <Image
             src={`${apiBackend}/${icon}`}
-            alt={name}
+            alt=""
+            aria-hidden="true"
             width={size}
+            height={size}
+            unoptimized
             className={`object-contain brightness-0 dark:invert ${is_parent ? 'mr-3' : 'ml-1.5'}`}
         />
     )
 }
 
 export function NavModules({ modules }: { modules: SidebarModule[] }) {
+    const pathname = usePathname()
     const parents  = modules.filter((m) => m.is_parent)
     const children = modules.filter((m) => !m.is_parent)
 
@@ -31,16 +44,16 @@ export function NavModules({ modules }: { modules: SidebarModule[] }) {
                 if (kids.length === 0) return null
                 return (
                     <SidebarGroup key={parent.id}>
-                        <SidebarGroupLabel>
-                            <ModuleIcon icon={parent.icon} name={parent.name} size={20} is_parent={parent.is_parent} />
+                        <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/60">
+                            <ModuleIcon icon={parent.icon} size={20} is_parent={parent.is_parent} />
                             <span className="text-base">{parent.name}</span>
                         </SidebarGroupLabel>
                         <SidebarMenu>
                             {kids.map((mod) => (
                                 <SidebarMenuItem key={mod.id}>
-                                    <SidebarMenuButton asChild>
+                                    <SidebarMenuButton asChild isActive={isModuleActive(pathname, mod.path)}>
                                         <Link href={`/modules${mod.path}`}>
-                                            <ModuleIcon icon={mod.icon} name={mod.name} size={20} is_parent={mod.is_parent} />
+                                            <ModuleIcon icon={mod.icon} size={20} is_parent={mod.is_parent} />
                                             <span>{mod.name}</span>
                                         </Link>
                                     </SidebarMenuButton>
@@ -56,9 +69,9 @@ export function NavModules({ modules }: { modules: SidebarModule[] }) {
                     <SidebarMenu>
                         {orphans.map((mod) => (
                             <SidebarMenuItem key={mod.id}>
-                                <SidebarMenuButton asChild>
+                                <SidebarMenuButton asChild isActive={isModuleActive(pathname, mod.path)}>
                                     <Link href={`/modules${mod.path}`}>
-                                        <ModuleIcon icon={mod.icon} name={mod.name} size={20} is_parent={mod.is_parent} />
+                                        <ModuleIcon icon={mod.icon} size={20} is_parent={mod.is_parent} />
                                         <span>{mod.name}</span>
                                     </Link>
                                 </SidebarMenuButton>

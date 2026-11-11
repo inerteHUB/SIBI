@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { serviceSearchThesisPre, serviceViewThesisPre } from "./serviceLandingThesisPre";
 import { SearchResultItem, ThesisPreDetailPublic } from "./typeLandingThesisPre";
@@ -32,7 +32,7 @@ export const useLandingThesisPreDetail = () => {
     const [thesis, setThesis]   = useState<ThesisPreDetailPublic | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const fetchThesis = async (id: number) => {
+    const fetchThesis = useCallback(async (id: number) => {
         setLoading(true);
         try {
             const data = await serviceViewThesisPre(id);
@@ -42,7 +42,7 @@ export const useLandingThesisPreDetail = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     return { thesis, fetchThesis, loading };
 };

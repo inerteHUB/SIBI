@@ -111,34 +111,34 @@ export default function UiReservationList({
     const renderStatusBadge = (r: Reservation) => {
         if (r.is_expired || r.status === "Expirada") {
             return (
-                <Badge variant="destructive" className="gap-1 text-xs">
-                    <FaTimesCircle className="size-3" /> Expirada
+                <Badge variant="destructive" className="gap-1">
+                    <FaTimesCircle aria-hidden="true" data-icon="inline-start" /> Expirada
                 </Badge>
             );
         }
         switch (r.status) {
             case "Pendiente":
                 return (
-                    <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-300 dark:text-amber-400 gap-1 text-xs">
-                        <FaClock className="size-3" /> Pendiente
+                    <Badge variant="outline" className="gap-1 border-warning/60 bg-warning/20 text-warning-foreground">
+                        <FaClock aria-hidden="true" data-icon="inline-start" /> Pendiente
                     </Badge>
                 );
             case "Lista_Para_Recojo":
                 return (
-                    <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-300 dark:text-blue-400 font-semibold gap-1 text-xs">
-                        <FaBookmark className="size-3" /> Lista para Recojo
+                    <Badge variant="default" className="gap-1 font-semibold">
+                        <FaBookmark aria-hidden="true" data-icon="inline-start" /> Lista para recojo
                     </Badge>
                 );
             case "Completada":
                 return (
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-300 dark:text-emerald-400 gap-1 text-xs">
-                        <FaCheckCircle className="size-3" /> Completada
+                    <Badge variant="secondary" className="gap-1">
+                        <FaCheckCircle aria-hidden="true" data-icon="inline-start" /> Completada
                     </Badge>
                 );
             case "Cancelada":
                 return (
-                    <Badge variant="secondary" className="gap-1 text-xs">
-                        <FaBan className="size-3" /> Cancelada
+<Badge variant="outline" className="gap-1">
+                    <FaBan aria-hidden="true" data-icon="inline-start" /> Cancelada
                     </Badge>
                 );
             default:
@@ -147,42 +147,45 @@ export default function UiReservationList({
     };
 
     if (loadingReservations && reservations.length === 0) return <LoadingText />;
-    if (errorReservations) return <p className="text-destructive font-medium">{errorReservations}</p>;
+    if (errorReservations) return <p className="rounded-2xl border border-destructive/30 bg-destructive/5 p-5 font-medium text-destructive" role="alert">{errorReservations}</p>;
 
     const canReady = selectedReservation?.status === "Pendiente";
     const canFulfill = selectedReservation?.status === "Lista_Para_Recojo" || selectedReservation?.status === "Pendiente";
     const canCancel = selectedReservation?.status === "Pendiente" || (selectedReservation?.status === "Lista_Para_Recojo" && !selectedReservation?.is_expired);
 
     return (
-        <div className="space-y-4">
-            {/* Tarjetas de Métricas Resumen */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                <div className="rounded-xl border p-3 bg-card shadow-xs">
-                    <div className="text-xs text-muted-foreground font-medium">Total Solicitudes</div>
-                    <div className="text-2xl font-bold mt-1">{countTotal}</div>
-                </div>
-                <div className="rounded-xl border border-amber-300/40 dark:border-amber-700/40 p-3 bg-amber-500/5 shadow-xs">
-                    <div className="text-xs text-amber-600 dark:text-amber-400 font-medium">En Cola de Espera</div>
-                    <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{countPending}</div>
-                </div>
-                <div className="rounded-xl border border-blue-300/40 dark:border-blue-700/40 p-3 bg-blue-500/5 shadow-xs">
-                    <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">Listas para Recojo</div>
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{countReady}</div>
-                </div>
-                <div className="rounded-xl border border-emerald-300/40 dark:border-emerald-700/40 p-3 bg-emerald-500/5 shadow-xs">
-                    <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Entregadas / Completadas</div>
-                    <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{countFulfilled}</div>
-                </div>
-                <div className="rounded-xl border border-rose-300/40 dark:border-rose-700/40 p-3 bg-rose-500/5 shadow-xs">
-                    <div className="text-xs text-rose-600 dark:text-rose-400 font-medium">Canceladas / Expiradas</div>
-                    <div className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">{countCancelled}</div>
-                </div>
-            </div>
+        <div className="flex flex-col gap-5">
+            <section aria-label="Resumen de reservas" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+                {[
+                    { label: "Solicitudes", value: countTotal, note: "Registros consultados", icon: FaBookmark },
+                    { label: "En espera", value: countPending, note: "Pendientes de atención", icon: FaClock },
+                    { label: "Listas para recojo", value: countReady, note: "Dentro de su ventana", icon: FaHourglassHalf },
+                    { label: "Completadas", value: countFulfilled, note: "Entregas formalizadas", icon: FaCheckCircle },
+                    { label: "Cerradas", value: countCancelled, note: "Canceladas o expiradas", icon: FaBan },
+                ].map(({ label, value, note, icon: Icon }) => (
+                    <article key={label} className="rounded-2xl border border-border/80 border-t-2 border-t-primary bg-card p-4 shadow-sm sm:p-5">
+                        <div className="flex items-start justify-between gap-2">
+                            <div>
+                                <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground sm:text-[11px]">{label}</p>
+                                <p className="mt-2 font-landing-display text-3xl leading-none sm:text-4xl">{value}</p>
+                            </div>
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+                                <Icon aria-hidden="true" />
+                            </span>
+                        </div>
+                        <p className="mt-4 text-[11px] leading-4 text-muted-foreground">{note}</p>
+                    </article>
+                ))}
+            </section>
 
             {/* Barra de herramientas y acciones */}
-            <div className="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
+            <div className="flex flex-col gap-4 rounded-2xl border border-border/80 bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between lg:p-5">
                 <div className="flex flex-wrap gap-2 items-center">
                     <UiReservationCreate refreshReservations={refreshReservations} />
+
+                    <p aria-live="polite" className="min-h-8 self-center text-xs text-muted-foreground">
+                        {selectedReservation ? `Seleccionada: ${selectedReservation.code}` : "Selecciona una fila para ver las acciones disponibles."}
+                    </p>
 
                     <Button
                         variant="outline"
@@ -191,7 +194,7 @@ export default function UiReservationList({
                         onClick={handleView}
                         className="gap-2"
                     >
-                        <FaEye className="size-4" /> Ver Detalle
+                        <FaEye aria-hidden="true" data-icon="inline-start" /> Ver detalle
                     </Button>
 
                     <Button
@@ -199,9 +202,9 @@ export default function UiReservationList({
                         size="sm"
                         disabled={!selectedId || !canReady}
                         onClick={handleReady}
-                        className="gap-2 text-blue-600 hover:text-blue-700"
+                        className="gap-2 text-primary"
                     >
-                        <FaBookmark className="size-4" /> Preparar para Recojo
+                        <FaBookmark aria-hidden="true" data-icon="inline-start" /> Preparar para recojo
                     </Button>
 
                     <Button
@@ -209,9 +212,9 @@ export default function UiReservationList({
                         size="sm"
                         disabled={!selectedId || !canFulfill}
                         onClick={handleFulfill}
-                        className="gap-2 text-emerald-600 hover:text-emerald-700"
+                        className="gap-2 text-secondary-foreground"
                     >
-                        <FaCheckCircle className="size-4" /> Entregar / Formalizar
+                        <FaCheckCircle aria-hidden="true" data-icon="inline-start" /> Registrar entrega
                     </Button>
 
                     <Button
@@ -221,14 +224,17 @@ export default function UiReservationList({
                         onClick={handleCancel}
                         className="gap-2 text-destructive hover:text-destructive"
                     >
-                        <FaBan className="size-4" /> Cancelar
+                        <FaBan aria-hidden="true" data-icon="inline-start" /> Cancelar reserva
                     </Button>
                 </div>
 
-                <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
+                <div className="flex flex-wrap items-center gap-2 md:justify-end">
                     <div className="relative w-full sm:w-64">
-                        <FaSearch className="absolute left-2.5 top-2.5 text-muted-foreground size-4" />
+                        <label className="sr-only" htmlFor="reservation-search">Buscar reservas</label>
+                        <FaSearch aria-hidden="true" className="absolute left-2.5 top-3 text-muted-foreground" />
                         <Input
+                            id="reservation-search"
+                            aria-label="Buscar código, lector o título"
                             placeholder="Buscar código, lector, título..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -237,7 +243,7 @@ export default function UiReservationList({
                     </div>
 
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-[170px] h-9 text-xs">
+                        <SelectTrigger aria-label="Filtrar reservas por estado" className="h-10 w-[190px] text-sm">
                             <SelectValue placeholder="Estado" />
                         </SelectTrigger>
                         <SelectContent>
@@ -250,23 +256,23 @@ export default function UiReservationList({
                         </SelectContent>
                     </Select>
 
-                    <Button
+                        <Button
+                        aria-label="Actualizar reservas"
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9"
                         onClick={refreshReservations}
-                        title="Recargar lista"
+                        title="Actualizar reservas"
                     >
-                        <FaSync className="size-3.5" />
+                        <FaSync aria-hidden="true" data-icon="inline-start" />
                     </Button>
                 </div>
             </div>
 
             {/* Tabla de Reservaciones */}
-            <div className="rounded-md border bg-card overflow-hidden">
+            <div className="overflow-x-auto rounded-2xl border border-border/80 bg-card shadow-sm">
                 <Table>
                     <TableHeader className="bg-muted/50">
-                        <TableRow>
+                        <TableRow className="bg-secondary/60 text-xs uppercase tracking-wide text-muted-foreground">
                             <TableHead className="w-[160px]">Código</TableHead>
                             <TableHead>Lector</TableHead>
                             <TableHead>Título de la Obra</TableHead>
@@ -290,8 +296,16 @@ export default function UiReservationList({
                                     <TableRow
                                         key={r.id}
                                         onClick={() => handleRowClick(r.id)}
-                                        className={`cursor-pointer transition-colors ${
-                                            isSelected ? "bg-primary/10 hover:bg-primary/15" : ""
+                                        onKeyDown={(event) => {
+                                            if (event.key === "Enter" || event.key === " ") {
+                                                event.preventDefault();
+                                                handleRowClick(r.id);
+                                            }
+                                        }}
+                                        aria-selected={isSelected}
+                                        tabIndex={0}
+                                        className={`cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-ring ${
+                                            isSelected ? "bg-accent/70 hover:bg-accent" : "hover:bg-muted/70"
                                         }`}
                                     >
                                         <TableCell className="font-mono font-semibold text-xs">
@@ -335,7 +349,7 @@ export default function UiReservationList({
                                         <TableCell>
                                             {r.status === "Lista_Para_Recojo" && r.hours_left_to_pickup !== undefined && r.hours_left_to_pickup !== null ? (
                                                 <div className="flex items-center gap-1.5 text-xs">
-                                                    <FaHourglassHalf className={r.hours_left_to_pickup <= 12 ? "text-destructive size-3" : "text-blue-500 size-3"} />
+                                                    <FaHourglassHalf aria-hidden="true" className={r.hours_left_to_pickup <= 12 ? "text-destructive" : "text-primary"} />
                                                     <span className={r.hours_left_to_pickup <= 12 ? "text-destructive font-semibold" : "font-medium"}>
                                                         {r.hours_left_to_pickup > 0 ? `${r.hours_left_to_pickup} hrs restantes` : "Expirando"}
                                                     </span>

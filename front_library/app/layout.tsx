@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 
@@ -23,15 +23,23 @@ const sourceSerif = Source_Serif_4({
 });
  
 export const metadata: Metadata = {
-  title: "Sistema de Biblioteca",
-  description: "Sistema de biblioteca - UNSM",
+  title: "SIBI | Biblioteca universitaria",
+  description: "Consulta el repositorio académico y accede a los servicios bibliotecarios de la Universidad Nacional de San Martín.",
+  applicationName: "SIBI",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f2e9" },
+    { media: "(prefers-color-scheme: dark)", color: "#111f25" },
+  ],
 };
 
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
     return (
         <html lang="es" suppressHydrationWarning>
             <head />
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+            <body className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif.variable} antialiased`}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     {children}
                 </ThemeProvider>

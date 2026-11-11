@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LoadingText } from "@/components/loading";
 import { formatDateTime } from "@/lib/utils";
-import { FaEye, FaUndo, FaCalendarPlus } from "react-icons/fa";
+import { FaBook, FaClock, FaEye, FaUndo, FaCalendarPlus } from "react-icons/fa";
 
 import { Loan } from "../type/typeLoanBase";
 import { useLoanView } from "../hooks/useLoanView";
@@ -66,20 +66,45 @@ export default function UiLoanList({ loans, loadingLoans, errorLoans, refreshLoa
     // Filtros locales
     const filteredLoans = loans.filter((l) => {
         const matchesStatus = statusFilter === "TODOS" || l.status === statusFilter || (statusFilter === "Vencido" && l.is_overdue && l.status !== "Devuelto");
-        const matchesSearch = searchTerm === "" || 
+        const matchesSearch = searchTerm === "" ||
             l.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (l.user?.full_name && l.user.full_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
             (l.user?.dni && l.user.dni.includes(searchTerm));
         return matchesStatus && matchesSearch;
     });
 
+    const circulationCount = loans.filter((loan) => loan.status !== "Devuelto").length;
+    const overdueCount = loans.filter((loan) => loan.is_overdue && loan.status !== "Devuelto").length;
+    const returnedCount = loans.filter((loan) => loan.status === "Devuelto").length;
+
     if (loadingLoans && loans.length === 0) return <LoadingText />;
-    if (errorLoans) return <p className="text-destructive font-medium">{errorLoans}</p>;
+    if (errorLoans) return <p className="rounded-2xl border border-destructive/30 bg-destructive/5 p-5 font-medium text-destructive" role="alert">{errorLoans}</p>;
 
     return (
-        <div className="space-y-4">
-            {/* Barra de herramientas y filtros */}
-            <div className="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
+        <div className="flex flex-col gap-5">
+            <section aria-label="Resumen de circulación" className="grid gap-3 sm:grid-cols-3">
+                {[
+                    { label: "En circulación", value: circulationCount, note: "Préstamos sin devolución registrada", icon: FaBook },
+                    { label: "Con atraso", value: overdueCount, note: "Requieren seguimiento", icon: FaClock },
+                    { label: "Devueltos", value: returnedCount, note: "Devoluciones registradas", icon: FaUndo },
+                ].map(({ label, value, note, icon: Icon }) => (
+                    <article key={label} className="rounded-2xl border border-border/80 border-t-2 border-t-primary bg-card p-5 shadow-sm">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{label}</p>
+                                <p className="mt-2 font-landing-display text-4xl leading-none">{value}</p>
+                            </div>
+                            <span className="flex size-10 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+                                <Icon aria-hidden="true" />
+                            </span>
+                        </div>
+                        <p className="mt-4 text-xs text-muted-foreground">{note}</p>
+                    </article>
+                ))}
+            </section>
+
+            <div className="flex flex-col gap-4 rounded-2xl border border-border/80 bg-card p-4 shadow-sm lg:p-5">
+                <div className="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
                 <div className="flex flex-wrap gap-2 items-center">
                     <UiLoanCreate refreshLoans={refreshLoans} />
                     
@@ -90,7 +115,7 @@ export default function UiLoanList({ loans, loadingLoans, errorLoans, refreshLoa
                         onClick={handleView}
                         className="gap-2"
                     >
-                        <FaEye className="size-4" /> Ver Detalle
+                        <FaEye aria-hidden="true" data-icon="inline-start" /> Ver detalle
                     </Button>
 
                     <Button
@@ -98,9 +123,9 @@ export default function UiLoanList({ loans, loadingLoans, errorLoans, refreshLoa
                         size="sm"
                         disabled={!selectedId || selectedLoan?.status === "Devuelto"}
                         onClick={handleReturn}
-                        className="gap-2 text-emerald-600 dark:text-emerald-400"
+                        className="gap-2 text-primary"
                     >
-                        <FaUndo className="size-4" /> Devolución
+                        <FaUndo aria-hidden="true" data-icon="inline-start" /> Registrar devolución
                     </Button>
 
                     <Button
@@ -108,14 +133,20 @@ export default function UiLoanList({ loans, loadingLoans, errorLoans, refreshLoa
                         size="sm"
                         disabled={!selectedId || selectedLoan?.status === "Devuelto" || selectedLoan?.is_overdue}
                         onClick={handleRenew}
-                        className="gap-2 text-blue-600 dark:text-blue-400"
+                        className="gap-2 text-secondary-foreground"
                     >
-                        <FaCalendarPlus className="size-4" /> Renovar
+                        <FaCalendarPlus aria-hidden="true" data-icon="inline-start" /> Renovar préstamo
                     </Button>
+                    <p aria-live="polite" className="min-h-8 self-center text-xs text-muted-foreground">
+                        {selectedLoan ? `Seleccionado: ${selectedLoan.code}` : "Selecciona una fila para habilitar las acciones."}
+                    </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">
+                    <label className="sr-only" htmlFor="loan-search">Buscar préstamos</label>
                     <Input
+                        id="loan-search"
+                        aria-label="Buscar por código, lector o DNI"
                         placeholder="Buscar por código, lector o DNI..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -123,7 +154,7 @@ export default function UiLoanList({ loans, loadingLoans, errorLoans, refreshLoa
                     />
 
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-36 h-9 text-xs">
+                        <SelectTrigger aria-label="Filtrar préstamos por estado" className="w-40 h-10 text-sm">
                             <SelectValue placeholder="Estado" />
                         </SelectTrigger>
                         <SelectContent>
@@ -135,13 +166,14 @@ export default function UiLoanList({ loans, loadingLoans, errorLoans, refreshLoa
                         </SelectContent>
                     </Select>
                 </div>
+                </div>
             </div>
 
             {/* Tabla de préstamos */}
-            <div className="rounded-lg border bg-card overflow-hidden shadow-sm">
+            <div className="overflow-x-auto rounded-2xl border border-border/80 bg-card shadow-sm">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-muted/50 text-xs">
+                        <TableRow className="bg-secondary/60 text-xs uppercase tracking-wide text-muted-foreground">
                             <TableHead className="w-12 text-center">#</TableHead>
                             <TableHead>Código</TableHead>
                             <TableHead>Lector</TableHead>
@@ -168,8 +200,16 @@ export default function UiLoanList({ loans, loadingLoans, errorLoans, refreshLoa
                                     <TableRow
                                         key={l.id}
                                         onClick={() => handleRowClick(l.id)}
-                                        className={`cursor-pointer transition-colors text-xs md:text-sm ${
-                                            isSelected ? "bg-muted" : "hover:bg-muted/40"
+                                        onKeyDown={(event) => {
+                                            if (event.key === "Enter" || event.key === " ") {
+                                                event.preventDefault();
+                                                handleRowClick(l.id);
+                                            }
+                                        }}
+                                        aria-selected={isSelected}
+                                        tabIndex={0}
+                                        className={`cursor-pointer transition-colors text-xs focus-visible:outline-2 focus-visible:outline-ring md:text-sm ${
+                                            isSelected ? "bg-accent/70" : "hover:bg-muted/70"
                                         }`}
                                     >
                                         <TableCell className="text-center font-mono text-muted-foreground">

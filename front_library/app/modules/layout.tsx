@@ -84,11 +84,11 @@ export default function LayoutModules({ children }: { children: React.ReactNode 
             } as React.CSSProperties}
         >
             <AppSidebar modules={data.modules} variant="sidebar" />
-            <SidebarInset>
+            <SidebarInset className="min-h-svh bg-background">
                 <SiteHeader user={data.user} />
-                <div className="p-4 lg:p-6">
+                <main className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-7 px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
                     {children}
-                </div>
+                </main>
             </SidebarInset>
         </SidebarProvider>
     );

@@ -15,9 +15,9 @@ export function TeamSwitcher() {
           <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
             <BookOpen className="size-4" />
           </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium">SIBI</span>
-            <span className="truncate text-xs">Biblioteca</span>
+          <div className="grid flex-1 text-left leading-tight">
+            <span className="truncate text-sm font-semibold tracking-[0.14em]">SIBI</span>
+            <span className="truncate text-xs text-sidebar-foreground/65">Biblioteca universitaria · UNSM</span>
           </div>
         </div>
       </SidebarMenuItem>
