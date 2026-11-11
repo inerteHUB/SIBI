@@ -17,7 +17,7 @@ interface Props {
 
 export default function UiLoanCreate({ refreshLoans }: Props) {
     const [open, setOpen] = useState(false);
-    const { formLoan, fieldArray, createLoan, loading } = useLoanCreate(() => {
+    const { formLoan, fieldArray, loading } = useLoanCreate(() => {
         refreshLoans();
         setOpen(false);
     });
@@ -41,7 +41,7 @@ export default function UiLoanCreate({ refreshLoans }: Props) {
 
                 <div className="py-4">
                     <Form {...formLoan}>
-                        <form onSubmit={formLoan.handleSubmit(createLoan)} className="space-y-4">
+                        <form onSubmit={(event) => event.preventDefault()} className="space-y-4">
                             {/* Datos del Prestatario */}
                             <div className="grid grid-cols-2 gap-3">
                                 <FormField
@@ -88,7 +88,7 @@ export default function UiLoanCreate({ refreshLoans }: Props) {
                                     <FormItem>
                                         <FormLabel>Días de Préstamo <span className="text-destructive">*</span></FormLabel>
                                         <FormControl>
-                                            <Input type="number" min={1} max={5} {...field} />
+                                            <Input type="number" min={1} {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -96,12 +96,10 @@ export default function UiLoanCreate({ refreshLoans }: Props) {
                             />
 
                             {/* Alerta de dependencia con módulo Libros */}
-                            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-300">
-                                <p className="font-semibold flex items-center gap-1.5">
-                                    ⚠️ Bloqueado por módulo Libros:
-                                </p>
-                                <p className="mt-1 text-[11px] leading-relaxed">
-                                    El catálogo general y el selector interactivo de ejemplares dependen de los contratos públicos del módulo de Libros (aún no expuestos en FastAPI). Para la demostración se permite especificar el ID físico del ejemplar manualmente.
+                            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200" role="status">
+                                <p className="font-semibold">Selección de ejemplares no disponible</p>
+                                <p className="mt-1 text-xs leading-relaxed">
+                                    La OpenAPI no publica un catálogo de libros o ejemplares. Para evitar registrar préstamos con identificadores inventados, esta operación queda deshabilitada hasta contar con ese contrato.
                                 </p>
                             </div>
 
@@ -114,8 +112,9 @@ export default function UiLoanCreate({ refreshLoans }: Props) {
                                         variant="outline"
                                         size="sm"
                                         className="h-8 gap-1 text-xs"
+                                        disabled
                                         onClick={() => fieldArray.append({
-                                            copy_id: 1,
+                                            copy_id: "" as unknown as number,
                                             title: "",
                                             copy_code: "",
                                             initial_condition: "Bueno",
@@ -151,7 +150,7 @@ export default function UiLoanCreate({ refreshLoans }: Props) {
                                                     <FormItem className="col-span-2">
                                                         <FormLabel className="text-xs">Título del Libro <span className="text-destructive">*</span></FormLabel>
                                                         <FormControl>
-                                                            <Input className="h-8 text-xs" placeholder="Ej: Cálculo de Stewart" {...field} />
+                                                            <Input className="h-8 text-xs" placeholder="Disponible cuando exista el catálogo" {...field} disabled />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -164,7 +163,7 @@ export default function UiLoanCreate({ refreshLoans }: Props) {
                                                     <FormItem>
                                                         <FormLabel className="text-xs">ID Copia</FormLabel>
                                                         <FormControl>
-                                                            <Input className="h-8 text-xs" type="number" {...field} />
+                                                            <Input className="h-8 text-xs" type="number" placeholder="Sin contrato de catálogo" {...field} disabled />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -180,7 +179,7 @@ export default function UiLoanCreate({ refreshLoans }: Props) {
                                                     <FormItem>
                                                         <FormLabel className="text-xs">Cód. Patrimonial / Barras</FormLabel>
                                                         <FormControl>
-                                                            <Input className="h-8 text-xs" placeholder="BAR-001" {...field} />
+                                                            <Input className="h-8 text-xs" placeholder="Sin contrato de catálogo" {...field} disabled />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -192,10 +191,10 @@ export default function UiLoanCreate({ refreshLoans }: Props) {
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel className="text-xs">Estado Físico</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value || "Bueno"}>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value || undefined} disabled>
                                                             <FormControl>
                                                                 <SelectTrigger className="h-8 text-xs">
-                                                                    <SelectValue />
+<SelectValue placeholder="Sin dato de catálogo" />
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
@@ -231,7 +230,7 @@ export default function UiLoanCreate({ refreshLoans }: Props) {
                                 <Button type="button" variant="secondary" onClick={() => handleOpenChange(false)}>
                                     <IoMdCloseCircleOutline className="size-5" /> Cancelar
                                 </Button>
-                                <Button type="submit" disabled={loading} className="gap-2">
+                                <Button type="submit" disabled className="gap-2">
                                     <FaRegSave className="size-4" /> {loading ? "Guardando..." : "Guardar Préstamo"}
                                 </Button>
                             </div>

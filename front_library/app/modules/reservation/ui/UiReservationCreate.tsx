@@ -16,7 +16,7 @@ interface Props {
 
 export default function UiReservationCreate({ refreshReservations }: Props) {
     const [open, setOpen] = useState(false);
-    const { formReservation, createReservation, loading } = useReservationCreate(() => {
+    const { formReservation, loading } = useReservationCreate(() => {
         refreshReservations();
         setOpen(false);
     });
@@ -40,7 +40,13 @@ export default function UiReservationCreate({ refreshReservations }: Props) {
 
                 <div className="py-4">
                     <Form {...formReservation}>
-                        <form onSubmit={formReservation.handleSubmit(createReservation)} className="space-y-4">
+                        <form onSubmit={(event) => event.preventDefault()} className="space-y-4">
+                            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200" role="status">
+                                <p className="font-semibold">Selección de libros no disponible</p>
+                                <p className="mt-1 text-xs leading-relaxed">
+                                    La OpenAPI no publica un catálogo de libros. No se enviará una reserva con identificadores ingresados o inventados manualmente.
+                                </p>
+                            </div>
                             {/* Libro y Título */}
                             <div className="space-y-3 p-3 border rounded-lg bg-muted/20">
                                 <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Datos del Material</h4>
@@ -52,7 +58,7 @@ export default function UiReservationCreate({ refreshReservations }: Props) {
                                         <FormItem>
                                             <FormLabel>ID del Libro / Obra <span className="text-destructive">*</span></FormLabel>
                                             <FormControl>
-                                                <Input type="number" min={1} placeholder="Ej: 15" {...field} />
+                                                <Input type="number" min={1} placeholder="Catálogo no disponible" {...field} disabled />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -66,7 +72,7 @@ export default function UiReservationCreate({ refreshReservations }: Props) {
                                         <FormItem>
                                             <FormLabel>Título del Libro <span className="text-destructive">*</span></FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Ej: Cálculo Diferencial e Integral" {...field} />
+                                                <Input placeholder="Catálogo no disponible" {...field} disabled />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -130,7 +136,7 @@ export default function UiReservationCreate({ refreshReservations }: Props) {
                                 >
                                     Cancelar
                                 </Button>
-                                <Button type="submit" disabled={loading} className="gap-2">
+                                <Button type="submit" disabled className="gap-2">
                                     <FaRegSave className="size-4" />
                                     {loading ? "Guardando..." : "Confirmar Reserva"}
                                 </Button>

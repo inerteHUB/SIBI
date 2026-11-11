@@ -11,7 +11,7 @@ import { ReservationCreatePayload } from "../type/typeReservationBase";
 const SchemaReservationCreate = z.object({
     book_id: z.coerce.number().min(1, "Debe ingresar un ID de libro válido"),
     title: z.string().min(1, "El título de la obra es requerido"),
-    target_user_id: z.string().optional().transform((val) => (val && val.trim() !== "" ? Number(val) : undefined)),
+    target_user_id: z.string().optional(),
     observation: z.string().optional(),
 });
 

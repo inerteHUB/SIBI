@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { serviceSystemData } from "./serviceSystemData";
@@ -9,7 +9,7 @@ export const useSystemData = () => {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
-    const fetchSystemData = async () => {
+    const fetchSystemData = useCallback(async () => {
         setLoading(true);
         try {
             const data = await serviceSystemData();
@@ -17,8 +17,7 @@ export const useSystemData = () => {
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : "Error al obtener datos del sistema";
 
-            if (errorMessage === 'No se pudo validar las credenciales') {
-                localStorage.removeItem('token'); 
+            if (errorMessage.startsWith("Sesión expirada o no autorizada")) {
                 toast.error("Sesión expirada. Redirigiendo al login...");
                 router.replace('/auth/login');
             } else {
@@ -28,7 +27,7 @@ export const useSystemData = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
 
     return { data, fetchSystemData, loading };
 };

@@ -1,6 +1,6 @@
 import { apiBackend } from "@/config/constants";
 import { ModuleEdit } from "../type/typeModuleEdit";
-import { getAuthHeaders } from "@/lib/utils";
+import { getAuthHeadersMultipart } from "@/lib/utils";
 
 export const serviceModuleEdit = async (id: number, module: ModuleEdit) => {
   const formData = new FormData();
@@ -15,14 +15,9 @@ export const serviceModuleEdit = async (id: number, module: ModuleEdit) => {
     formData.append("icon", module.icon);
   }
 
-  const authHeaders = getAuthHeaders();
-  const headers: Record<string, string> = {
-    Authorization: authHeaders.Authorization,
-  };
-  
   const response = await fetch(`${apiBackend}/v1/module/${id}`, {
     method: "PUT",
-    headers,
+    headers: getAuthHeadersMultipart(),
     body: formData,
   });
 

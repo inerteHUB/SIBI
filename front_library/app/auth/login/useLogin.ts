@@ -36,9 +36,8 @@ export const useLogin = () => {
         setLoading(true);
 
         try {
-            const res = await serviceLogin(data);
-            localStorage.setItem("token", res.access_token);
-            router.push("/modules");
+            await serviceLogin(data);
+            router.replace("/modules");
         } catch (err: unknown) {
             if (err instanceof Error) {
                 toast.error(err.message);

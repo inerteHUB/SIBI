@@ -17,7 +17,7 @@ type Props = React.ComponentProps<typeof Sidebar> & {
 
 export function AppSidebar({ modules, ...props }: Props) {
     return (
-        <Sidebar collapsible="icon" {...props}>
+        <Sidebar {...props}>
             <SidebarHeader>
                 <TeamSwitcher />
             </SidebarHeader>

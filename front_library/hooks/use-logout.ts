@@ -7,10 +7,18 @@ export const useLogout = () => {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-    const logout = () => {
+    const logout = async () => {
         setLoading(true);
-        localStorage.removeItem("token");
-        router.push("/auth/login/");
+        try {
+            const response = await fetch("/api/session/logout", {
+                method: "POST",
+                credentials: "same-origin",
+            });
+            if (!response.ok) throw new Error("No se pudo cerrar la sesión de forma segura.");
+        } finally {
+            router.replace("/auth/login");
+            router.refresh();
+        }
     };
 
     return { logout, loading };

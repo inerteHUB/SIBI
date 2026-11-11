@@ -37,7 +37,7 @@ export default function UiLoanList({ loans, loadingLoans, errorLoans, refreshLoa
     const [openSurvey, setOpenSurvey] = useState(false);
     const [surveyLoanId, setSurveyLoanId] = useState<number | null>(null);
 
-    const { loan: selectedLoanDetail, fetchLoan, loading: loadingDetail } = useLoanView();
+    const { loan: selectedLoanDetail, fetchLoan } = useLoanView();
 
     const selectedLoan = loans.find((l) => l.id === selectedId) ?? null;
 

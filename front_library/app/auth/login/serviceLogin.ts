@@ -1,18 +1,15 @@
-import { apiBackend } from "@/config/constants";
 import { handleApiResponse } from "@/lib/utils";
 import { Login } from "./typeLogin";
 
 export const serviceLogin = async (data: Login) => {
-  const response = await fetch(`${apiBackend}/v1/auth/login`, {
+  const response = await fetch("/api/session/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "same-origin",
     body: JSON.stringify(data),
   });
 
-  return handleApiResponse<{ access_token: string; token_type: string }>(
-    response,
-    "Error al iniciar sesión"
-  );
+  return handleApiResponse<{ authenticated: true }>(response, "Error al iniciar sesión");
 };

@@ -5,30 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const getAuthToken = (): string | null => {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("token");
-};
+export const getAuthHeaders = (): Record<string, string> => ({
+  "Content-Type": "application/json",
+});
 
-export const getAuthHeaders = (): Record<string, string> => {
-  const token = getAuthToken();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-  return headers;
-};
-
-export const getAuthHeadersMultipart = (): Record<string, string> => {
-  const token = getAuthToken();
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-  return headers;
-};
+// El navegador envía la cookie same-origin automáticamente; nunca se fija Content-Type
+// para FormData porque el navegador debe generar su propio boundary.
+export const getAuthHeadersMultipart = (): Record<string, string> => ({});
 
 /**
  * Parsea mensajes de error devueltos por FastAPI (incluyendo arreglos de validación 422)
@@ -79,9 +62,6 @@ export async function handleApiResponse<T = unknown>(response: Response, default
 
   if (!response.ok) {
     if (response.status === 401) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-      }
       throw new Error("Sesión expirada o no autorizada. Por favor inicie sesión nuevamente.");
     }
 

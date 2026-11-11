@@ -19,7 +19,7 @@ const SchemaItem = z.object({
 const SchemaLoanCreate = z.object({
     user_id: z.coerce.number().min(1, "Debe seleccionar un usuario prestatario"),
     loan_type: z.enum(["Sala", "Domicilio"]),
-    days: z.coerce.number().min(1, "Mínimo 1 día").max(5, "Máximo 5 días (según política de circulación)"),
+    days: z.coerce.number().min(1, "Ingrese un plazo válido"),
     observation: z.string().optional(),
     details: z.array(SchemaItem).min(1, "Debe agregar al menos un ejemplar"),
 });
@@ -34,14 +34,14 @@ export const useLoanCreate = (onSuccess: () => void) => {
         defaultValues: {
             user_id: "" as unknown as number,
             loan_type: "Domicilio",
-            days: 3,
+            days: "" as unknown as number,
             observation: "",
             details: [
                 {
-                    copy_id: 1,
+                    copy_id: "" as unknown as number,
                     copy_code: "",
                     title: "",
-                    initial_condition: "Bueno",
+                    initial_condition: "",
                     notes: "",
                 },
             ],
